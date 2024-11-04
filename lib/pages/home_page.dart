@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'add_edit_shoe_page.dart';
 
-
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -67,20 +66,8 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Ubah indeks halaman aktif
     });
-    // Pindah ke halaman yang sesuai
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CartPage()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProfilePage()),
-      );
-    }
   }
 
   @override
@@ -90,81 +77,88 @@ class _HomePageState extends State<HomePage> {
         title: Text('Toko Sepatu'),
         backgroundColor: Colors.blueAccent,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _shoes.isEmpty
-              ? Center(child: Text('Tidak ada data sepatu'))
-              : ListView.builder(
-                  itemCount: _shoes.length,
-                  itemBuilder: (context, index) {
-                    final shoe = _shoes[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: AssetImage(
-                            'assets/images/sepatuhome1.jpg'
-                          ),
-                        ),
-                        title: Text(shoe['title']),
-                        subtitle: Text(shoe['body']),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Colors.blueAccent),
-                              onPressed: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddEditShoePage(shoe: shoe),
-                                  ),
-                                );
-                                if (result != null && result is Map) {
-                                  // Update data lokal
-                                  setState(() {
-                                    final index = _shoes.indexWhere((s) => s['id'] == result['id']);
-                                    if (index != -1) {
-                                      _shoes[index] = result; // Update data sepatu
+      body: IndexedStack(
+        index: _selectedIndex, // Menampilkan halaman sesuai indeks
+        children: [
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _shoes.isEmpty
+                  ? Center(child: Text('Tidak ada data sepatu'))
+                  : ListView.builder(
+                      itemCount: _shoes.length,
+                      itemBuilder: (context, index) {
+                        final shoe = _shoes[index];
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: AssetImage('assets/images/sepatuhome1.jpg'),
+                            ),
+                            title: Text(shoe['title']),
+                            subtitle: Text(shoe['body']),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blueAccent),
+                                  onPressed: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddEditShoePage(shoe: shoe),
+                                      ),
+                                    );
+                                    if (result != null && result is Map) {
+                                      // Update data lokal
+                                      setState(() {
+                                        final index = _shoes.indexWhere((s) => s['id'] == result['id']);
+                                        if (index != -1) {
+                                          _shoes[index] = result; // Update data sepatu
+                                        }
+                                      });
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Berhasil diperbarui!')),
+                                      );
                                     }
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Berhasil diperbarui!')),
-                                  );
-                                }
-                              },
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    deleteShoe(shoe['id']); // Hapus data sepatu
+                                  },
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                deleteShoe(shoe['id']); // Hapus data sepatu
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddEditShoePage()),
-          );
-          if (result != null && result is Map) {
-            // Tambahkan data baru ke daftar lokal
-            setState(() {
-              _shoes.add(result);
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Berhasil menambah data!')),
-            );
-          }
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blueAccent,
+                          ),
+                        );
+                      },
+                    ),
+          CartPage(), // Halaman keranjang
+          AccountScreen(), // Halaman profil
+        ],
       ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddEditShoePage()),
+                );
+                if (result != null && result is Map) {
+                  // Tambahkan data baru ke daftar lokal
+                  setState(() {
+                    _shoes.add(result);
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Berhasil menambah data!')),
+                  );
+                }
+              },
+              child: Icon(Icons.add),
+              backgroundColor: Colors.blueAccent,
+            )
+          : null, // Sembunyikan tombol jika bukan di halaman home
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(

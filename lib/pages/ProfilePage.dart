@@ -1,41 +1,86 @@
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
+  @override
+  _AccountScreenState createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  bool isNotificationOn = true; // Menggunakan state untuk notifikasi
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profil'),
-        backgroundColor: Colors.blueAccent,
+        title: Text('Akun Saya'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/avatar.jpeg'), // Gambar avatar dari assets
-            ),
-            SizedBox(height: 16),
-            Text(
-              'NI MADE CAHYANI DEWI', 
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              ' Universitas Teknologi Yogyakarta', 
-              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Aksi lain jika diperlukan
-              },
-              child: Text('Edit Profil'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent, // Setel warna latar belakang tombol
+            Center(
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIrt4GDobUKmQDKO8V5eaaJsVGvir5ZT5dFQ&s'), 
               ),
+            ),
+            SizedBox(height: 10),
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'NI MADE CAHYANI DEWI', 
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Universitas Teknologi Yogyakarta', 
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+
+            ListTile(
+              title: Text('Notifikasi'),
+              trailing: Switch(
+                value: isNotificationOn,
+                onChanged: (bool value) {
+                  setState(() {
+                    isNotificationOn = value; 
+                  });
+                },
+              ),
+
+            ),
+            ListTile(
+              title: Text('Kelola Akun'),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.pushNamed(context, '/manage_account');
+              },
+            ),
+
+            ListTile(
+              title: Text('Privacy Policy'),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                // Tambahkan logika untuk membuka Privacy Policy
+              },
+            ),
+            ListTile(
+              title: Text('Terms of Service'),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                // Tambahkan logika untuk membuka Terms of Service
+              },
             ),
           ],
         ),
